@@ -32,11 +32,17 @@ for filename in glob.glob('*output.txt'):
     
     # delete columns we do not need
     df = df.drop(["lexem", "?","grammatical info", "dunno1", "dunno2"], axis = 1)
+    # go through the dataframe of the file
+    for index, row in df.iterrows():
+        pass
+        # look at the single sentences (as long as index[i] > index[i-1] it is one sentence; as soon as index[i] < index[i-1] a new sentence has started)
 
-# aus den übrigen die Nomen heraussuchen
+        # within that sentence search for the nouns of the sentence
 
-# connections zu den Nomen heraussuchen
+        # look out for any token that is conntected to the noun(s)
 
-# roots herausfiltern
+        #search for the root of the sentence 
 
-# fertig ? :D
+        # extract the nps with the roots of the sentence into a new file
+
+        # finished 
