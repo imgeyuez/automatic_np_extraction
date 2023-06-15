@@ -58,23 +58,43 @@ for filename in glob.glob('*output.txt'):
 
                     print(token_refers_to_dict)
 
+                    #Raha
+                    collected_nps = []
+
                     np = list()
 
                     for index, row in df.iterrows():
                          if row["Wordtype"] == "N":
                             index_of_noun = row["index"]
+
+                            # Raha: make a list of the row for the current noun
+                            current_np = list (row['token'])
+
                             # check if the any word referes to the noun
                             key_value_pairs = token_refers_to_dict.items()
-                            np.append(row["token"])
+                            
+                            #Then we do not need this, so I commented it out.
+                            #np.append(row["token"])
+
                             for pair in key_value_pairs:
 
                                 if index_of_noun in pair[1]:
                                     # get the token
                                     deprel_key = pair[0]
                                     print(pair, "\n")
-                                    np.append(pair[0])
                                     
-                    print(np)
+                                    #Raha: so I changed it from np to current np:
+                                    current_np.append(pair[0])
+                            
+                            #Raha: So here we could append the np we found to the np list of the sentence
+                            np.append(current_np)
+
+                    #Raha: Then, we can append all the nps of all sentences to a collected np list.
+                    #Sorry, if it seems several of embedded lists and then messy! 
+                    #we could think of something better later. It is just tentative.
+                    collected_nps.append(np) 
+
+                    print(collected_nps)
                         # continuation
                         
                         # look out for any token that is conntected to the noun(s)
