@@ -73,7 +73,7 @@ for filename in glob.glob('*output.txt'):
                     
                     # find the root 
                     if row["deprel"] == "root":
-                        if str(row["deprel"]).isalnum() == True:
+                        if str(row["deprel"]).isalpha() == True:
                             root_of_sentence = df.loc[index, :].values.flatten().tolist()
                         else:
                             if root_of_sentence:
