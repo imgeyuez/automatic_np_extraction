@@ -3,166 +3,184 @@ import os
 import glob
 import pandas as pd
 
-collected_nps = list()
+# list to store ALL nps of ONE FILE in
+nps_of_file = list()
 
-# create data frames out of the output.txt-files
+# go through the files in the folder
 for filename in glob.glob('*output.txt'):
-        
-        # open in readonly mode
-        with open(os.path.join(os.getcwd(), filename), 'r', encoding="UTF-8-sig") as file: 
 
-            # d in sentences
-            file_input = file.readlines()
+    # create a new filename for the to be ouputted file 
+    # newfilename = filename + str("_exported_nps")
 
-            # list to generate a single sentence
-            single_sentence = list()
+    # create file to save output in 
+    # with open(newfilename, "w", encoding="UTF-8-sig") as f:
+    #     pass
 
-            counter = 0 
+    # open the file in read-mode
+    with open(os.path.join(os.getcwd(), filename), 'r', encoding="UTF-8-sig") as file: 
 
-            # go through each line/"sentence" of the file
-            for line in file_input:
-                # if it is not an empty line/"sentence", add it to the 
-                # list of a single sentence
-                if line[0] != "\n":
-                    single_sentence.append(line)
+        # read in the lines of token
+        file_input = file.readlines()
 
-                # empty line/"sentence" indicates the end of a sentence 
-                elif line[0] == "\n":
-                    # --> clear the list of the single sentence for the new sentence
-                    sentence_as_elements = list()
+        # list to generate a single sentences out of the file
+        single_sentence = list()
+        sentence_counter = 1
+
+        # go through each line/"sentence" of the file
+        for line in file_input:
+            # if it is not an empty line/"sentence", add it to the 
+            # list of a single sentence
+            if line[0] != "\n":
+                single_sentence.append(line)
+
+            # empty line/"sentence" indicates the end of a sentence 
+            elif line[0] == "\n":
+                # split each element of the sentence into the single token-information
+                sentence_as_elements = list()
+                for row in single_sentence:
+                    elements = row.split("\t")
+                    sentence_as_elements.append(elements)
+                # print("Das war ein Satz")
+                
+                # create dataframe with column names
+                df = pd.DataFrame(sentence_as_elements, columns = ["ID", "token", "lemma", "wordtype", "POSTag", "features", "head", "deprel", "dunno1", "dunno2"])
+                
+                # delete columns we do not need
+                df = df.drop(["dunno1", "dunno2"], axis = 1)
+
+                # print the upper three rows
+                print(df)
+
+                # extract the whole token-column to get the whole sentence as tokens
+                sentence_list = df["token"].values.tolist()
+                sentence_as_string = " ".join(sentence_list)
+                number_of_tokens_of_sentence = len(sentence_list)
+                # print(sentence_as_string)
+
+                token_head_list = list()
+
+                token_index_list = list()
+
+                token_id_list = list()
+
+                # generate dictionary 
+                # go through the dataframe of the file
+                for index, row in df.iterrows():
+                    token_head_list.append([[row["token"]], row["head"]])
+
                     
-                    # and for every element (row in the file) split the elements and append them as the new sentence
-                    for row in single_sentence:
-                        elements = row.split("\t")
-                        sentence_as_elements.append(elements)
-                    
-                    #print(sentence_as_elements)
-                    #break
+                    # find the root 
+                    if row["deprel"] == "root":
+                        if str(row["deprel"]).isalnum() == True:
+                            root_of_sentence = df.loc[index, :].values.flatten().tolist()
+                        else:
+                            if root_of_sentence:
+                                root_of_sentence == "None"
+                            else:
+                                pass
+                                                        
+                    # add the token and its index to the other dictionary
+                    token_index_list.append([[row["token"]], index])
+                    token_id_list.append([[row["token"]], row["ID"]])
 
-                    """
-                    --> output until here:
-                    the list "sentence_as_elements" where every element is a list which
-                    contains the single rows of the file, split by \t
-                    [
-                    ['1', 'M.', 'M.', 'N', 'NE', 'Fem|_|Sg', '0', 'root', '_', '_\n'], 
-                    ['2', 'Meier', 'Meier', 'N', 'NE', 'Fem|_|Sg', '1', 'app', '_', '_\n'], 
-                    ['3', 'Müllergasse', 'Müllergasse', 'N', 'NE', 'Fem|_|Sg', '2', 'app', '_', '_\n']
-                    ]
-                    """
+                # list for all NPs in the sentence
+                all_nps_of_sentence = list()
 
-                    # create dataframe with column names
-                    df = pd.DataFrame(sentence_as_elements, columns = ["ID", "token", "lemma", "wordtype", "POSTag", "features", "head", "deprel", "dunno1", "dunno2"])
-                    
-                    # delete columns we do not need
-                    df = df.drop(["dunno1", "dunno2"], axis = 1)
+                # go through the dataframe once again
+                for index, row in df.iterrows():
 
-                    # print the upper three rows
-                    #print(df.head(30))
+                    # if the wordtype is a noun
+                    if row["wordtype"] == "N":
 
-                    # extract the whole token-column to get the whole sentence 
-                    sentence_list = df["token"].values.tolist()
-                    #print(sentence_list)
+                        # create list for the NP:
+                        current_np_ids = list()
 
-                    token_head_dict = dict()
+                        # get all the info of the noun 
+                        info_of_noun = df.loc[index, :].values.flatten().tolist()
+                        # print(info_of_noun)
 
-                    token_id_dict = dict()
+                        id_of_noun = info_of_noun[0]
+                        head_of_noun_ID = info_of_noun[6]
 
-                    # generate dictionary 
-                    # go through the dataframe of the file
-                    for index, row in df.iterrows():
-                        token_head_dict[row["token"]] = row["head"]
-                        if row["deprel"] == "root":
-                            if row["deprel"] == "." or row["deprel"] == ",":
-                                 pass 
-                            elif row["POSTag"] == "CARD":
-                                 pass
+                        # append the nouns ID to the list
+                        current_np_ids.append(id_of_noun)
+                        # print(current_np_ids)
+
+                        if int(head_of_noun_ID) != 0:
+                            current_np_ids.append(head_of_noun_ID)
+                            # print(current_np_ids)
+
+                        # in the following:
+                        # check if any word refers to the noun as head
+                        for ind, token_head_pair in enumerate(token_head_list):
                             
-                        # add the token and its ID to the other dictionary
-                        token_id_dict[row["token"]] = row["ID"]
-                        
-                    print(token_id_dict)    
-
-
-                    #print(token_head_dict)
-
-                    # list for all NPs in the sentence
-                    all_nps_of_sentence = list()
-
-                    # list for a single NP in the sentence
-                    # current_np = list()
-
-                    # go through the dataframe once again
-                    for index, row in df.iterrows():
-
-                        # if the wordtype is a noun
-                        if row["wordtype"] == "N":
-
-                            # create list for the NP:
-                            current_np = list()
-
-                            # get the ID of the noun 
-                            id_of_noun = row["ID"]
-
-                            """
-                            # # Raha: make a list of the row for the current noun
-                            # current_np = list (row['token'])
-
-                            # print(current_np)
-                            """
-
-                            # forgot what this was for 
-                            current_np.append(row["token"])
-
-                            """
-                            #Then we do not need this, so I commented it out.
-                            #single_np.append(row["token"])
-                            """
-                            # check if the any word refers to the noun as head
-                            token_head_pairs = token_head_dict.items()
-
-                            for pair in token_head_pairs:
+                            # check if the ID of the noun is the deprel of 
+                            # another token --> noun is head of that token
+                            if id_of_noun == token_head_pair[1]:
                                 
-                                # check if the ID of the noun is the deprel of 
-                                # another token --> head of the token
-                                if id_of_noun in pair[1]:
-                                    # get the token
-                                    deprel_key = pair[0]
-                                    #print(pair, "\n")
-                                    current_np.append(pair[0])
+                                # append the ID of the token of the sentence 
+                                # --> get a list with IDs, can sort them and 
+                                # then create a second list with the filled in token (information)
+                                current_np_ids.append(token_id_list[ind][1])
 
-                                    #print(current_np)
-                    
-                                    """
-                                    This was already included
-                                    #Raha: so I changed it from np to current np:
-                                    #current_np.append(pair[0])
-                                    """
+                        # print(current_np_ids)
+                        current_np_ids.sort()
+                        number_of_tokens_of_np = len(current_np_ids)
+                        # print(current_np_ids)
 
-                                """
-                                #Raha: So here we could append the np we found to the np list of the sentence
-                                #single_np.append(current_np)
+                        # create NP with the regarding token information, based on the IDs
+                        current_np = list()
 
-                                -> Yes, but we need to change the variable name
-                                as the variable for the goal is already existent
-                                """
-                            all_nps_of_sentence.append(current_np)
-                            #current_np = list()
-                            print(all_nps_of_sentence)
+                        for token_id in current_np_ids:
+                            # print(token_id)
+                            index_in_df = int(token_id) - 1
+                            # print(index_in_df)
+                            if int(index_in_df) < 0:
+                                token_info = tuple(df.loc[int(token_id), :].values.flatten().tolist())
+                            else:
+                                token_info = tuple(df.loc[int(index_in_df), :].values.flatten().tolist())
 
-                    #break
+                            current_np.append(token_info)
 
-                    # #Raha: Then, we can append all the nps of all sentences to a collected np list.
-                    # #Sorry, if it seems several of embedded lists and then messy! 
-                    # #we could think of something better later. It is just tentative.
-                    # collected_nps.append(single_np) 
+                        # print(current_np)
 
-        
-        # within that sentence search for the nouns of the sentence
+                        """
+                        create the final form of the single np on form of:
+                        [	Dateiname {str},
+                            Satz_ID_NR {int},
+                            Satz {str}, 
+                            (root, POS-Tag, grammatical_info) {tuple},
+                            Anzahl-der-Token-der-NP {int},
+                            [NP] {list}, Bsp.: [(token1, POS-tag, grammatical_info),... (token-n, POS-tag, grammatical_info)],
+                        ]
+                        """
 
-        # look out for any token that is conntected to the noun(s)
+                        final_form_of_np = [
+                            filename, 
+                            sentence_counter, 
+                            sentence_as_string,
+                            root_of_sentence,
+                            number_of_tokens_of_np,
+                            current_np,
+                            "\n"
+                            ]
 
-        #search for the root of the sentence 
+                    # print(final_form_of_np)
+                    all_nps_of_sentence.append(final_form_of_np)
 
-        # extract the nps with the roots of the sentence into a new file
+                # --> clear the list of the single sentence for the new sentence
+                # print(single_sentence)
+                # print(sentence_list)
+                single_sentence = list()
+                print(current_np)
 
-        # finished 
+        sentence_counter += 1      
+        # print(all_nps_of_sentence)
+        nps_of_file.append(all_nps_of_sentence)  
+        nps_of_file.append("\n")
+        # for element in single_sentence:
+        #     print(element)
+
+# for element in nps_of_file:
+#     print(element)
+
