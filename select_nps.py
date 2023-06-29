@@ -6,6 +6,8 @@ import pandas as pd
 # list to store ALL nps of ONE FILE in
 nps_of_file = list()
 
+sentence_counter = 1
+
 # go through the files in the folder
 for filename in glob.glob('*output.txt'):
 
@@ -24,7 +26,7 @@ for filename in glob.glob('*output.txt'):
 
         # list to generate a single sentences out of the file
         single_sentence = list()
-        sentence_counter = 1
+        
 
         # go through each line/"sentence" of the file
         for line in file_input:
@@ -142,7 +144,9 @@ for filename in glob.glob('*output.txt'):
 
                             current_np.append(token_info)
 
-                        # print(current_np)
+                        # print("current_np:\n", current_np, "\n")
+
+                        # print("current sentence:\n", sentence_as_string, "\n")
 
                         """
                         create the final form of the single np on form of:
@@ -155,32 +159,33 @@ for filename in glob.glob('*output.txt'):
                         ]
                         """
 
-                        final_form_of_np = [
-                            filename, 
-                            sentence_counter, 
-                            sentence_as_string,
-                            root_of_sentence,
-                            number_of_tokens_of_np,
-                            current_np,
-                            "\n"
-                            ]
+                        final_form_of_np = [filename, sentence_counter, sentence_as_string, root_of_sentence, number_of_tokens_of_np, current_np]
+
+                        # print("current form of np:\n", final_form_of_np, "\n")
+
+                        
 
                     # print(final_form_of_np)
-                    all_nps_of_sentence.append(final_form_of_np)
+                        all_nps_of_sentence.append(final_form_of_np)
+                        # print(all_nps_of_sentence, "\n")
+                        # print(nps_of_file)
+                        # print("\n")
 
                 # --> clear the list of the single sentence for the new sentence
                 # print(single_sentence)
                 # print(sentence_list)
                 single_sentence = list()
-                print(current_np)
+                # print(current_np)
 
-        sentence_counter += 1      
+                sentence_counter += 1      
         # print(all_nps_of_sentence)
-        nps_of_file.append(all_nps_of_sentence)  
-        nps_of_file.append("\n")
+                nps_of_file.append(all_nps_of_sentence)  
+
+                # print(nps_of_file)
+                nps_of_file.append("\n")
         # for element in single_sentence:
         #     print(element)
 
-# for element in nps_of_file:
-#     print(element)
+for element in nps_of_file:
+    print(element)
 
