@@ -2,21 +2,23 @@
 import os
 import glob
 import pandas as pd
+import ast
 
 # list to store ALL nps of ONE FILE in
 nps_of_file = list()
 
 sentence_counter = 1
+np_counter = 1
 
 # go through the files in the folder
 for filename in glob.glob('*output.txt'):
 
     # create a new filename for the to be ouputted file 
-    # newfilename = filename + str("_exported_nps")
+    newfilename = filename + str("_exported_nps.txt")
 
     # create file to save output in 
-    # with open(newfilename, "w", encoding="UTF-8-sig") as f:
-    #     pass
+    with open(newfilename, "w", encoding="UTF-8-sig") as f:
+        pass
 
     # open the file in read-mode
     with open(os.path.join(os.getcwd(), filename), 'r', encoding="UTF-8-sig") as file: 
@@ -51,7 +53,7 @@ for filename in glob.glob('*output.txt'):
                 df = df.drop(["dunno1", "dunno2"], axis = 1)
 
                 # print the upper three rows
-                print(df)
+                # print(df)
 
                 # extract the whole token-column to get the whole sentence as tokens
                 sentence_list = df["token"].values.tolist()
@@ -74,6 +76,7 @@ for filename in glob.glob('*output.txt'):
                     # find the root 
                     if row["deprel"] == "root":
                         if str(row["deprel"]).isalpha() == True:
+
                             root_of_sentence = df.loc[index, :].values.flatten().tolist()
                         else:
                             if root_of_sentence:
@@ -150,7 +153,8 @@ for filename in glob.glob('*output.txt'):
 
                         """
                         create the final form of the single np on form of:
-                        [	Dateiname {str},
+                        [	Satz_NP-Nummer,
+                            Dateiname {str},
                             Satz_ID_NR {int},
                             Satz {str}, 
                             (root, POS-Tag, grammatical_info) {tuple},
@@ -159,8 +163,11 @@ for filename in glob.glob('*output.txt'):
                         ]
                         """
 
-                        final_form_of_np = [filename, sentence_counter, sentence_as_string, root_of_sentence, number_of_tokens_of_np, current_np]
+                        sentence_np_id = str(sentence_counter) + "_" + str(np_counter)
 
+                        final_form_of_np = [sentence_np_id, filename, sentence_counter, sentence_as_string, root_of_sentence, number_of_tokens_of_np, current_np]
+
+                        np_counter += 1
                         # print("current form of np:\n", final_form_of_np, "\n")
 
                         
@@ -186,6 +193,9 @@ for filename in glob.glob('*output.txt'):
         # for element in single_sentence:
         #     print(element)
 
-for element in nps_of_file:
-    print(element)
+
+    # print the final ist into a new txt-file for the other groups to 
+    # process further 
+    with open(newfilename, "a", encoding="UTF-8-sig") as f:
+        print(nps_of_file, file=f)
 
