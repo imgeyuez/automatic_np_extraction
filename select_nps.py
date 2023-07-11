@@ -26,6 +26,7 @@ for filename in glob.glob('*output.txt'):
         # list to generate a single sentences out of the file
         single_sentence = list()
         
+
         # go through each line/"sentence" of the file
         for line in file_input:
             # if it is not an empty line/"sentence", add it to the 
@@ -46,7 +47,7 @@ for filename in glob.glob('*output.txt'):
                 
                 # delete columns we do not need
                 df = df.drop(["dunno1", "dunno2"], axis = 1)
-                
+
                 # extract the whole token-column to get the whole sentence as tokens
                 sentence_list = df["token"].values.tolist()
                 sentence_as_string = " ".join(sentence_list)
@@ -92,6 +93,7 @@ for filename in glob.glob('*output.txt'):
                         current_np_ids = list()
 
                         # get all the info of the noun 
+                        info_of_noun = df.loc[index, :].values.flatten().tolist()
 
                         id_of_noun = info_of_noun[0]
                         head_of_noun_ID = info_of_noun[6]
@@ -114,7 +116,7 @@ for filename in glob.glob('*output.txt'):
                                 # --> get a list with IDs, can sort them and 
                                 # then create a second list with the filled in token (information)
                                 current_np_ids.append(token_id_list[ind][1])
-                                
+
                         current_np_ids.sort()
                         number_of_tokens_of_np = len(current_np_ids)
 
@@ -147,14 +149,13 @@ for filename in glob.glob('*output.txt'):
                         final_form_of_np = [sentence_np_id, filename, sentence_counter, sentence_as_string, root_of_sentence, number_of_tokens_of_np, current_np]
 
                         np_counter += 1
-                        
+
                         all_nps_of_sentence.append(final_form_of_np)
 
                 # --> clear the list of the single sentence for the new sentence
                 single_sentence = list()
 
                 sentence_counter += 1      
-
                 nps_of_file.append(all_nps_of_sentence)  
 
                 # print(nps_of_file)
