@@ -1,3 +1,4 @@
+# modules to import
 import os
 import glob
 import pandas as pd
@@ -169,19 +170,3 @@ for filename in glob.glob('*output.txt'):
     # process further 
     with open(newfilename, "a", encoding="UTF-8-sig") as f:
         print(nps_of_file, file=f)
-
-    """ The following commented code-block was intended to be used
-    to create a new folder in the directory and save the new files 
-    in there. But I got an error notice whenever I tried it out and
-    did not figure out yet how to debug it."""
-    # new_filename = newfilename.format(folder_name)
-    # file = os.path.join(folder, new_filename)
-    # os.makedirs(folder)
-    # # print the final ist into a new txt-file for the other groups to 
-    # # process further 
-    # with open(new_filename, "a", encoding="UTF-8-sig") as f:
-    #     print(nps_of_file, file=f)
-
-    # same but as a pickle file
-    # with open(newfilename, 'wb') as f:  # open a text file
-    #     pickle.dump(nps_of_file, f) # serialize the list
